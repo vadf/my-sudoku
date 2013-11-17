@@ -1,6 +1,7 @@
 import unittest
 import sudoku
 import os
+import xmlrunner
 
 class TestSudoku(unittest.TestCase):
     """Sudoku testing class"""
@@ -74,5 +75,5 @@ class TestSudoku(unittest.TestCase):
 
 
 if __name__ == '__main__':
-    unittest.main()
+    unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
     

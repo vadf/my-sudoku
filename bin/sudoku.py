@@ -8,10 +8,10 @@ class Sudoku:
 
     def __init__(self, filename):
         """(Sudoku, str) -> NoneType
-        
+
         Reads Sudoku game field from a file.
         Raises FormatError exception if game field is incorrect.
-        
+
         >>> Sudoku('game_field.txt')
         """
         self.field = []
@@ -25,18 +25,18 @@ class Sudoku:
             else:
                 f.close()
                 raise FormatError("Line '" + str(line) + "' doesn't match pattern '" + str(pattern) + "'")
-         
+
         if count < 9:
             f.close()
             raise FormatError("Number of lines is " + str(count) + ", but should be 9")
-                 
+
         f.close()
 
     def get_row(self, num):
         """(Sudoku, int) -> list of int
-        
-        Retrieve row[num] of game field 
-        
+
+        Retrieve row[num] of game field
+
         >>> sudoku = Sudoku("test_game_ok.txt")
         >>> sudoku.get_row(0)
         [6,0,0,4,0,0,0,0,2]
@@ -45,9 +45,9 @@ class Sudoku:
 
     def get_col(self, num):
         """(Sudoku, int) -> list of int
-        
-        Retrieve col[num] of game field 
-        
+
+        Retrieve col[num] of game field
+
         >>> sudoku = Sudoku("test_game_ok.txt")
         >>> sudoku.get_col(0)
         [6,0,1,0,3,2,0,8,4]
@@ -56,8 +56,8 @@ class Sudoku:
 
     def get_block(self, num):
         """(Sudoku, int) -> list of int
-        
-        Retrieve block[num] of game field 
+
+        Retrieve block[num] of game field
         
         >>> sudoku = Sudoku("test_game_ok.txt")
         >>> sudoku.get_block(0)
@@ -71,9 +71,9 @@ class Sudoku:
 
     def check_for_duplicates(self):
         """(Sudoku, int) -> bool
-        
+
         Check Sudoku field for duplicate values in rows, cols and blocks
-        
+
         >>> sudoku = Sudoku("test_game_ok.txt")
         >>> sudoku.check_row_duplicates(1)
         False
@@ -88,7 +88,7 @@ class Sudoku:
             list = self.get_block(i)
             if sum(list) != sum(set(list)):
                 return True
-        
+
         return False
 
 if __name__ == '__main__':
