@@ -35,7 +35,7 @@ class Sudoku:
     def get_row(self, num):
         """(Sudoku, int) -> list of int
         
-        Retrieve row num of game field 
+        Retrieve row[num] of game field 
         
         >>> sudoku = Sudoku("test_game_ok.txt")
         >>> sudoku.get_row(0)
@@ -43,20 +43,53 @@ class Sudoku:
         """
         return self.field[num]
 
-    def check_row_duplicates(self, num):
+    def get_col(self, num):
+        """(Sudoku, int) -> list of int
+        
+        Retrieve col[num] of game field 
+        
+        >>> sudoku = Sudoku("test_game_ok.txt")
+        >>> sudoku.get_col(0)
+        [6,0,1,0,3,2,0,8,4]
+        """
+        return [x[num] for x in self.field]
+
+    def get_block(self, num):
+        """(Sudoku, int) -> list of int
+        
+        Retrieve block[num] of game field 
+        
+        >>> sudoku = Sudoku("test_game_ok.txt")
+        >>> sudoku.get_block(0)
+        [6,0,0,0,0,5,1,2,0]
+        """
+        row = 3 * (num / 3)
+        col = 3 * (num % 3)
+        return self.field[row][col : col + 3] + \
+            self.field[row + 1][col : col + 3] + \
+            self.field[row + 2][col : col + 3]
+
+    def check_for_duplicates(self):
         """(Sudoku, int) -> bool
         
-        Check row num in Sudoku field for duplicate values
+        Check Sudoku field for duplicate values in rows, cols and blocks
         
         >>> sudoku = Sudoku("test_game_ok.txt")
         >>> sudoku.check_row_duplicates(1)
         False
         """
-        row = self.get_row(num)
-        if sum(row) == sum(set(row)):
-            return True
-        else:
-            return False
+        for i in range(0,9):
+            list = self.get_row(i)
+            if sum(list) != sum(set(list)):
+                return True
+            list = self.get_col(i)
+            if sum(list) != sum(set(list)):
+                return True
+            list = self.get_block(i)
+            if sum(list) != sum(set(list)):
+                return True
+        
+        return False
 
 if __name__ == '__main__':
     pass
