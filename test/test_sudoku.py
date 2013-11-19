@@ -73,6 +73,46 @@ class TestSudoku(unittest.TestCase):
         self.sudoku = sudoku.Sudoku(self.dir_path + '/' + 'test_game_dup3.txt')
         self.assertTrue(self.sudoku.check_for_duplicates())
 
+    def test_get_block_num0(self):
+        """Test that block number = 0"""
+        expected = 0
+        actual = sudoku.get_block_num(0, 0)
+        self.assertEqual(actual, expected)
+        actual = sudoku.get_block_num(2, 2)
+        self.assertEqual(actual, expected)
+        actual = sudoku.get_block_num(2, 0)
+        self.assertEqual(actual, expected)
+        actual = sudoku.get_block_num(0, 2)
+        self.assertEqual(actual, expected)
+
+
+    def test_get_block_num4(self):
+        """Test that block number = 4"""
+        expected = 4
+        actual = sudoku.get_block_num(3, 3)
+        self.assertEqual(actual, expected)
+        actual = sudoku.get_block_num(5, 5)
+        self.assertEqual(actual, expected)
+        actual = sudoku.get_block_num(3, 5)
+        self.assertEqual(actual, expected)
+        actual = sudoku.get_block_num(5, 3)
+        self.assertEqual(actual, expected)
+
+    def test_get_possible_value(self):
+        """Test method get_possible_values that returns list of possible values for each empty cell"""
+        result = self.sudoku.get_possible_values(self.sudoku.field)
+        self.assertEqual(result[1][(8,1)], set([6]))
+        self.assertEqual(result[2][(0,1)], set([8,3]))
+        self.assertEqual(result[3][(5,4)], set([1,5,6]))
+
+    def test_solve(self):
+        """Test that sudoku is solved"""
+        result = self.sudoku.solve()
+        for line in result:
+            if 0 in line:
+                self.fail()
+        self.sudoku.field = result
+        self.assertFalse(self.sudoku.check_for_duplicates())
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
