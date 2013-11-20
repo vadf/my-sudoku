@@ -1,4 +1,5 @@
 import re
+import copy
 
 class FormatError(Exception):
     pass
@@ -36,6 +37,7 @@ def get_block_num(row, col):
 
 class Sudoku:
     """Sudoku class"""
+    field_list = []
 
     def __init__(self, filename):
         """(Sudoku, str) -> NoneType
@@ -45,14 +47,14 @@ class Sudoku:
 
         >>> Sudoku('game_field.txt')
         """
-        self.field = []
+        self.work_field = []
         f = open(filename, 'r')
         count = 0
         pattern = re.compile('^[1-9*]{9}$')
         for line in f:
             if pattern.match(line):
                 count += 1
-                self.field.append([int(x) if x.isdigit() else 0 for x in line.strip()])
+                self.work_field.append([int(x) if x.isdigit() else 0 for x in line.strip()])
             else:
                 f.close()
                 raise FormatError("Line '" + str(line) + "' doesn't match pattern '" + str(pattern) + "'")
@@ -72,7 +74,7 @@ class Sudoku:
         >>> sudoku.get_row(0)
         [6,0,0,4,0,0,0,0,2]
         """
-        return self.field[num]
+        return self.work_field[num]
 
     def get_col(self, num):
         """(Sudoku, int) -> list of int
@@ -83,7 +85,7 @@ class Sudoku:
         >>> sudoku.get_col(0)
         [6,0,1,0,3,2,0,8,4]
         """
-        return [x[num] for x in self.field]
+        return [x[num] for x in self.work_field]
 
     def get_block(self, num):
         """(Sudoku, int) -> list of int
@@ -96,9 +98,9 @@ class Sudoku:
         """
         row = 3 * (num / 3)
         col = 3 * (num % 3)
-        return self.field[row][col : col + 3] + \
-            self.field[row + 1][col : col + 3] + \
-            self.field[row + 2][col : col + 3]
+        return self.work_field[row][col : col + 3] + \
+            self.work_field[row + 1][col : col + 3] + \
+            self.work_field[row + 2][col : col + 3]
 
     def check_for_duplicates(self):
         """(Sudoku, list of in of int) -> bool
@@ -122,20 +124,21 @@ class Sudoku:
 
         return False
 
-    def get_possible_values(self, field):
-        """ (Sudoku, list of list of int) -> dictionary {int : dictionary {(int,int) : list of int}}
+    def get_possible_values(self):
+        """ (Sudoku) -> dictionary {int : dictionary {(int,int) : list of int}}
 
-        Returns the possible values of empty (= 0) field cells in format of Dictionary with key='number \
-        of possible values', value='Dictionary with key=field cell(int,int) and value=list of possible \
-        values'
+        Returns the possible values of empty (= 0) field cells for self.work_field in format of \
+        Dictionary with key='number of possible values', value='Dictionary with key=field \
+        cell(int,int) and value=set of possible values'
 
-        >>> get_possible_values(field)
-        {1: {(1, 2): (1, 2, 3)}}
+        >>> sudoku = Sudoku("test_game_ok.txt") 
+        >>> sudoku.get_possible_values()
+        {1: {(1, 2): set([5])}, ...}
         """
         result = {}
         max_set = set(range(1,10))
 
-        for row, line in enumerate(field):
+        for row, line in enumerate(self.work_field):
             for col, cell in enumerate(line):
                 if cell == 0:
                     cell_pos_values = max_set - set(self.get_row(row)) - set(self.get_col(col)) - \
@@ -148,17 +151,28 @@ class Sudoku:
                         result[key][(row,col)] = cell_pos_values
         return result
 
-    def solve(self, field=None):
-        if field == None:
-            field = self.field
-        pos_values = self.get_possible_values(field)
+    def solve(self):
+        """ (Sudoku) -> list of list of int
+
+        Returns the solved sudoku field
+
+        >>> sudoku = new Sudoku("test_game_ok.txt")
+        >>> sudoku.solve()
+        [[6, 3, 7, 4, 1, 5, 9, 8, 2], ...]
+        """
+
+        pos_values = self.get_possible_values()
         if 1 in pos_values:
             for key in pos_values[1]:
-                field[key[0]][key[1]] = pos_values[1][key].pop()
-            return self.solve(field)
+                self.work_field[key[0]][key[1]] = pos_values[1][key].pop()
+            self.solve()
         else:
-            return field
+            pass
+            
+        return self.work_field
 
 if __name__ == '__main__':
-    pass
+    sudoku = Sudoku("/home/vadim/python_projects/my-sudoku/test/test_game_ok.txt")
+    result = sudoku.solve()
+    print result
 

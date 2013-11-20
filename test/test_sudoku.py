@@ -100,7 +100,7 @@ class TestSudoku(unittest.TestCase):
 
     def test_get_possible_value(self):
         """Test method get_possible_values that returns list of possible values for each empty cell"""
-        result = self.sudoku.get_possible_values(self.sudoku.field)
+        result = self.sudoku.get_possible_values()
         self.assertEqual(result[1][(8,1)], set([6]))
         self.assertEqual(result[2][(0,1)], set([8,3]))
         self.assertEqual(result[3][(5,4)], set([1,5,6]))
@@ -111,7 +111,6 @@ class TestSudoku(unittest.TestCase):
         for line in result:
             if 0 in line:
                 self.fail()
-        self.sudoku.field = result
         self.assertFalse(self.sudoku.check_for_duplicates())
 
 if __name__ == '__main__':
