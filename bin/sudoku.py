@@ -38,6 +38,8 @@ def get_block_num(row, col):
 class Sudoku:
     """Sudoku class"""
     field_list = []
+    tmp_pos_values = {}
+    solved = False
 
     def __init__(self, filename):
         """(Sudoku, str) -> NoneType
@@ -161,18 +163,38 @@ class Sudoku:
         [[6, 3, 7, 4, 1, 5, 9, 8, 2], ...]
         """
 
-        pos_values = self.get_possible_values()
-        if 1 in pos_values:
-            for key in pos_values[1]:
-                self.work_field[key[0]][key[1]] = pos_values[1][key].pop()
+        self.field_list.append(copy.deepcopy(self.work_field))
+        cur_pos_values = self.get_possible_values()
+        if len(cur_pos_values) == 0:
+            self.solved = True
+            return self.work_field
+
+        if 0 in cur_pos_values:
+            return None
+
+        # get the first cell and its possible values (hope that it is cell with the most minimum values)
+        min_value = cur_pos_values.keys()[0]
+        cell = cur_pos_values[min_value].keys()[0]  
+
+        for value in cur_pos_values[min_value][cell]:
+            self.work_field = copy.deepcopy(self.field_list[-1])
+            self.work_field[cell[0]][cell[1]] = value
             self.solve()
-        else:
-            pass
-            
-        return self.work_field
+            if self.solved:
+                return self.work_field
+            self.work_field = self.field_list.pop(-1)
+
+    def print_field(self):
+        """ (Sudoku) -> None
+        Prints the current sudoku field
+        """
+        for line in self.work_field:
+            print line
 
 if __name__ == '__main__':
-    sudoku = Sudoku("/home/vadim/python_projects/my-sudoku/test/test_game_ok.txt")
-    result = sudoku.solve()
-    print result
+    sudoku = Sudoku("/home/vadim/test_game.txt")
+    sudoku.print_field()
+    sudoku.solve()
+    print ""
+    sudoku.print_field()
 

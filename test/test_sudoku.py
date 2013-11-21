@@ -2,6 +2,7 @@ import unittest
 import sudoku
 import os
 import xmlrunner
+import copy
 
 class TestSudoku(unittest.TestCase):
     """Sudoku testing class"""
@@ -105,13 +106,56 @@ class TestSudoku(unittest.TestCase):
         self.assertEqual(result[2][(0,1)], set([8,3]))
         self.assertEqual(result[3][(5,4)], set([1,5,6]))
 
-    def test_solve(self):
-        """Test that sudoku is solved"""
+    def test_solve_medium(self):
+        """Test that medium level sudoku is solved"""
+        origin_field = copy.deepcopy(self.sudoku.work_field)
         result = self.sudoku.solve()
+        # check that all 0 are replaced by real values
         for line in result:
             if 0 in line:
                 self.fail()
+        # check that there are no duplicate values in field
         self.assertFalse(self.sudoku.check_for_duplicates())
+        # check that origin cells on its place
+        for row, line in enumerate(origin_field):
+            for col, cell in enumerate(line):
+                if cell != 0:
+                    self.assertEqual(cell, result[row][col])
+
+    def test_solve_evil(self):
+        """Test that evil level sudoku is solved"""
+        self.sudoku = sudoku.Sudoku(self.dir_path + '/' +'test_game_evil.txt')
+        origin_field = copy.deepcopy(self.sudoku.work_field)
+        result = self.sudoku.solve()
+        # check that all 0 are replaced by real values
+        for line in result:
+            if 0 in line:
+                self.fail()
+        # check that there are no duplicate values in field
+        self.assertFalse(self.sudoku.check_for_duplicates())
+        # check that origin cells on its place
+        for row, line in enumerate(origin_field):
+            for col, cell in enumerate(line):
+                if cell != 0:
+                    self.assertEqual(cell, result[row][col])
+
+    @unittest.skip("uncomment and take a coffee break")
+    def test_solve_mad(self):
+        """Test that sudoku with only few init values can be solved"""
+        self.sudoku = sudoku.Sudoku(self.dir_path + '/' +'test_game_mad.txt')
+        origin_field = copy.deepcopy(self.sudoku.work_field)
+        result = self.sudoku.solve()
+        # check that all 0 are replaced by real values
+        for line in result:
+            if 0 in line:
+                self.fail()
+        # check that there are no duplicate values in field
+        self.assertFalse(self.sudoku.check_for_duplicates())
+        # check that origin cells on its place
+        for row, line in enumerate(origin_field):
+            for col, cell in enumerate(line):
+                if cell != 0:
+                    self.assertEqual(cell, result[row][col])
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))
