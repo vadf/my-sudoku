@@ -146,6 +146,8 @@ class Sudoku:
                     cell_pos_values = max_set - set(self.get_row(row)) - set(self.get_col(col)) - \
                         set(self.get_block(get_block_num(row,col))) - set([0])
                     key = len(cell_pos_values)
+                    if key == 0:
+                        return {0:0}
                     if key in result:
                         result[key][(row,col)] = cell_pos_values
                     else:
@@ -162,8 +164,7 @@ class Sudoku:
         >>> sudoku.solve()
         [[6, 3, 7, 4, 1, 5, 9, 8, 2], ...]
         """
-
-        self.field_list.append(copy.deepcopy(self.work_field))
+        
         cur_pos_values = self.get_possible_values()
         if len(cur_pos_values) == 0:
             self.solved = True
@@ -176,12 +177,17 @@ class Sudoku:
         min_value = cur_pos_values.keys()[0]
         cell = cur_pos_values[min_value].keys()[0]  
 
+        if min_value > 1:
+            self.field_list.append(copy.deepcopy(self.work_field))
+
         for value in cur_pos_values[min_value][cell]:
-            self.work_field = copy.deepcopy(self.field_list[-1])
             self.work_field[cell[0]][cell[1]] = value
             self.solve()
             if self.solved:
                 return self.work_field
+            self.work_field = copy.deepcopy(self.field_list[-1])
+        
+        if min_value > 1:
             self.work_field = self.field_list.pop(-1)
 
     def print_field(self):
@@ -189,7 +195,7 @@ class Sudoku:
         Prints the current sudoku field
         """
         for line in self.work_field:
-            print line
+            print line, sum(line)
 
 if __name__ == '__main__':
     sudoku = Sudoku("/home/vadim/test_game.txt")
