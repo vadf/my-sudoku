@@ -272,6 +272,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.solve == None and args.new == None:
+        print 'At least on of arguments -s(--solve) or -n(--new) should be specified'
         parser.print_help()
         exit()
 
@@ -290,6 +291,6 @@ if __name__ == '__main__':
         if args.new != 'no':
             sudoku.read_game(args.new)
             sudoku.print_field()
-            print 'New Game'
+            print 'New Game:'
         sudoku.create_new_game(args.level)
         sudoku.print_field()

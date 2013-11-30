@@ -128,8 +128,7 @@ class TestSudoku(unittest.TestCase):
 
         # check that all 0 are replaced by real values
         for line in result:
-            if 0 in line:
-                self.fail()
+            self.assertFalse(0 in line)
         # check that there are no duplicate values in field
         self.assertFalse(self.sudoku.check_for_duplicates())
         # check that origin cells on its place
@@ -149,8 +148,7 @@ class TestSudoku(unittest.TestCase):
         self.assertEqual(complexity, 0)
         # check that all 0 are replaced by real values
         for line in result:
-            if 0 in line:
-                self.fail('There is some unsolved cell')
+            self.assertFalse(0 in line)
         # check that there are no duplicate values in field
         self.assertFalse(self.sudoku.check_for_duplicates())
         # check that origin cells on its place
@@ -171,8 +169,7 @@ class TestSudoku(unittest.TestCase):
         self.assertEqual(complexity, 0)
         # check that all 0 are replaced by real values
         for line in result:
-            if 0 in line:
-                self.fail('There is some unsolved cell')
+            self.assertFalse(0 in line)
         # check that there are no duplicate values in field
         self.assertFalse(self.sudoku.check_for_duplicates())
         # check that origin cells on its place
