@@ -1,5 +1,7 @@
 import re
 import copy
+import argparse
+import os
 
 class FormatError(Exception):
     pass
@@ -194,13 +196,40 @@ class Sudoku:
         """ (Sudoku) -> None
         Prints the current sudoku field
         """
-        for line in self.work_field:
-            print line, sum(line)
+        print '   ' + str(range(1,10))[1:-1]
+        for row, line in enumerate(self.work_field):
+            print row + 1, line
 
 if __name__ == '__main__':
-    sudoku = Sudoku("/home/vadim/test_game.txt")
-    sudoku.print_field()
-    sudoku.solve()
-    print ""
-    sudoku.print_field()
+    parser = argparse.ArgumentParser(description='Sudoku arguments')
+    parser.add_argument('-s', '--solve', metavar='/path/to/file', help='solve Sudoku game')
+    parser.add_argument('-n', '--new', metavar='None or /path/to/file', nargs='?', const='no', \
+        help='create new Sudoku game, other sudoku game can be used as template')
+    parser.add_argument('-l', '--level', choices=['easy', 'medium', 'hard', 'evil'], \
+        default='medium', help='level of complexity for new Sudoku game')
+    args = parser.parse_args()
 
+    if args.solve == None and args.new == None:
+        parser.print_help()
+        exit()
+
+    if args.solve != None:
+        sudoku = Sudoku(args.solve)
+        print 'Game to solve:'
+        sudoku.print_field()
+        sudoku.solve()
+        print 'Solved game:'
+        sudoku.print_field()
+
+    if args.new != None:
+        print 'Create new game with level of complexity ' + args.level
+        print 'Use other Game as template: ' + args.new
+        flag_no = args.new == 'no'
+        if flag_no:
+            args.new = os.path.dirname(os.path.realpath(__file__)) + '/game_empty.txt'
+        sudoku = Sudoku(args.new)
+        if not flag_no:
+            sudoku.print_field()
+        sudoku.solve()
+        #sudoku.create_new(args.level)
+        sudoku.print_field()
