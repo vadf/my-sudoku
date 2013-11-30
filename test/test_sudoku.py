@@ -16,13 +16,23 @@ class TestSudoku(unittest.TestCase):
     def tearDown(self):
         self.sudoku = None
 
+    def test_init_none(self):
+        """Test that if no Game file provided, empty Sudoku field will be created"""
+        self.sudoku = sudoku.Sudoku()
+        complexity = self.sudoku.get_game_complexity()
+        self.assertEqual(complexity, 729)
+        # check that all cells are 0
+        for line in self.sudoku.work_field:
+            self.assertEqual(sum(line), 0)
+
     def test_init_wrong_format1(self):
         """Test load game file with incorrect field size (expected 9*9)"""
         self.assertRaises(sudoku.FormatError, sudoku.Sudoku, self.dir_path + '/' + 'test_game_nok1.txt')
 
     def test_init_wrong_format2(self):
         """Test load game file with incorrect field size (expected 9*9)"""
-        self.assertRaises(sudoku.FormatError, sudoku.Sudoku, self.dir_path + '/' + 'test_game_nok2.txt')
+        self.sudoku = sudoku.Sudoku()
+        self.assertRaises(sudoku.FormatError, self.sudoku.read_game, self.dir_path + '/' + 'test_game_nok2.txt')
 
     def test_init_wrong_format3(self):
         """Test load game file with incorrect character (expected [0-9*])"""
@@ -61,12 +71,13 @@ class TestSudoku(unittest.TestCase):
 
     def test_check_for_duplicates1(self):
         """Test duplicates in row"""
-        self.sudoku = sudoku.Sudoku(self.dir_path + '/' + 'test_game_dup1.txt')
+        self.sudoku = sudoku.Sudoku()
+        self.sudoku.read_game(self.dir_path + '/' + 'test_game_dup1.txt')
         self.assertTrue(self.sudoku.check_for_duplicates())
 
     def test_check_for_duplicates2(self):
         """Test duplicates in column"""
-        self.sudoku = sudoku.Sudoku(self.dir_path + '/' + 'test_game_dup2.txt')
+        self.sudoku.read_game(self.dir_path + '/' + 'test_game_dup2.txt')
         self.assertTrue(self.sudoku.check_for_duplicates())
 
     def test_check_for_duplicates3(self):
@@ -109,7 +120,12 @@ class TestSudoku(unittest.TestCase):
     def test_solve_medium(self):
         """Test that medium level sudoku is solved"""
         origin_field = copy.deepcopy(self.sudoku.work_field)
+        complexity = self.sudoku.get_game_complexity()
+        self.assertEqual(complexity, 117)
         result = self.sudoku.solve()
+        complexity = self.sudoku.get_game_complexity()
+        self.assertEqual(complexity, 0)
+
         # check that all 0 are replaced by real values
         for line in result:
             if 0 in line:
@@ -126,11 +142,15 @@ class TestSudoku(unittest.TestCase):
         """Test that evil level sudoku is solved"""
         self.sudoku = sudoku.Sudoku(self.dir_path + '/' +'test_game_evil.txt')
         origin_field = copy.deepcopy(self.sudoku.work_field)
+        complexity = self.sudoku.get_game_complexity()
+        self.assertEqual(complexity, 204)
         result = self.sudoku.solve()
+        complexity = self.sudoku.get_game_complexity()
+        self.assertEqual(complexity, 0)
         # check that all 0 are replaced by real values
         for line in result:
             if 0 in line:
-                self.fail()
+                self.fail('There is some unsolved cell')
         # check that there are no duplicate values in field
         self.assertFalse(self.sudoku.check_for_duplicates())
         # check that origin cells on its place
@@ -144,11 +164,15 @@ class TestSudoku(unittest.TestCase):
         """Test that sudoku with only few init values can be solved"""
         self.sudoku = sudoku.Sudoku(self.dir_path + '/' +'test_game_mad.txt')
         origin_field = copy.deepcopy(self.sudoku.work_field)
+        complexity = self.sudoku.get_game_complexity()
+        self.assertEqual(complexity, 671)
         result = self.sudoku.solve()
+        complexity = self.sudoku.get_game_complexity()
+        self.assertEqual(complexity, 0)
         # check that all 0 are replaced by real values
         for line in result:
             if 0 in line:
-                self.fail()
+                self.fail('There is some unsolved cell')
         # check that there are no duplicate values in field
         self.assertFalse(self.sudoku.check_for_duplicates())
         # check that origin cells on its place
@@ -156,6 +180,37 @@ class TestSudoku(unittest.TestCase):
             for col, cell in enumerate(line):
                 if cell != 0:
                     self.assertEqual(cell, result[row][col])
+
+    def test_create_new_game_easy(self):
+        """Test that easy Sudoku game can be created (based on template game)"""
+        level = 'easy'
+        self.sudoku.create_new_game(level)
+        complexity = self.sudoku.get_game_complexity()
+        self.assertTrue(complexity > self.sudoku.complexity_levels[level])
+
+    def test_create_new_game_medium(self):
+        """Test that medium Sudoku game can be created"""
+        level = 'medium'
+        self.sudoku = sudoku.Sudoku()
+        self.sudoku.create_new_game(level)
+        complexity = self.sudoku.get_game_complexity()
+        self.assertTrue(complexity > self.sudoku.complexity_levels[level])
+
+    def test_create_new_game_hard(self):
+        """Test that hard Sudoku game can be created"""
+        level = 'hard'
+        self.sudoku = sudoku.Sudoku()
+        self.sudoku.create_new_game(level)
+        complexity = self.sudoku.get_game_complexity()
+        self.assertTrue(complexity > self.sudoku.complexity_levels[level])
+
+    def test_create_new_game_evil(self):
+        """Test that evil Sudoku game can be created (based on template game)"""
+        level = 'evil'
+        self.sudoku = sudoku.Sudoku(self.dir_path + '/' +'test_game_evil.txt')
+        self.sudoku.create_new_game(level)
+        complexity = self.sudoku.get_game_complexity()
+        self.assertTrue(complexity > self.sudoku.complexity_levels[level])
 
 if __name__ == '__main__':
     unittest.main(testRunner=xmlrunner.XMLTestRunner(output='test-reports'))

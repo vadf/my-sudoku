@@ -1,7 +1,7 @@
 import re
 import copy
 import argparse
-import os
+import random
 
 class FormatError(Exception):
     pass
@@ -42,14 +42,31 @@ class Sudoku:
     field_list = []
     tmp_pos_values = {}
     solved = False
+    complexity_levels = {'easy': 70, 'medium': 110, 'hard' : 150, 'evil': 190}
 
-    def __init__(self, filename):
+    def __init__(self, filename=None):
         """(Sudoku, str) -> NoneType
+
+        Initiate Sudoku game from a file if provided.
+
+        >>> Sudoku('game_field.txt')
+        >>> Sudoku()
+        """
+        if filename == None:
+            self.work_field = []
+            for i in range(0,9):
+                self.work_field.append([0 for x in range(0,9)])
+        else:
+            self.read_game(filename)
+
+    def read_game(self, filename):
+        """ (Sudoku, str) -> NoneType
 
         Reads Sudoku game field from a file.
         Raises FormatError exception if game field is incorrect.
 
-        >>> Sudoku('game_field.txt')
+        >>> sudoku = Sudoku()
+        >>> sudoku.read_game('game_field.txt')
         """
         self.work_field = []
         f = open(filename, 'r')
@@ -95,7 +112,7 @@ class Sudoku:
         """(Sudoku, int) -> list of int
 
         Retrieve block[num] of game field
-        
+
         >>> sudoku = Sudoku("test_game_ok.txt")
         >>> sudoku.get_block(0)
         [6,0,0,0,0,5,1,2,0]
@@ -135,7 +152,7 @@ class Sudoku:
         Dictionary with key='number of possible values', value='Dictionary with key=field \
         cell(int,int) and value=set of possible values'
 
-        >>> sudoku = Sudoku("test_game_ok.txt") 
+        >>> sudoku = Sudoku('test_game_ok.txt')
         >>> sudoku.get_possible_values()
         {1: {(1, 2): set([5])}, ...}
         """
@@ -157,16 +174,38 @@ class Sudoku:
                         result[key][(row,col)] = cell_pos_values
         return result
 
+    def get_game_complexity(self):
+        """ (Sudoku) -> int
+
+        Returns value of game complexity.
+
+        >>> sudoku = Sudoku('test_game_ok.txt')
+        >>> sudoku.get_game_complexity()
+        100
+        >>> sudoku = Sudoku()
+        >>> sudoku.get_game_complexity()
+        729
+        >>> sudoku = Sudoku('test_game_ok.txt')
+        >>> sudoku.solve()
+        >>> sudoku.get_game_complexity()
+        0
+        """
+        pos_values = self.get_possible_values()
+        complexity = 0
+        for key in pos_values:
+            complexity += key * len(pos_values[key])
+        return complexity
+
     def solve(self):
         """ (Sudoku) -> list of list of int
 
         Returns the solved sudoku field
 
-        >>> sudoku = new Sudoku("test_game_ok.txt")
+        >>> sudoku = new Sudoku('test_game_ok.txt')
         >>> sudoku.solve()
         [[6, 3, 7, 4, 1, 5, 9, 8, 2], ...]
         """
-        
+
         cur_pos_values = self.get_possible_values()
         if len(cur_pos_values) == 0:
             self.solved = True
@@ -177,7 +216,7 @@ class Sudoku:
 
         # get the first cell and its possible values (hope that it is cell with the most minimum values)
         min_value = cur_pos_values.keys()[0]
-        cell = cur_pos_values[min_value].keys()[0]  
+        cell = cur_pos_values[min_value].keys()[0]
 
         if min_value > 1:
             self.field_list.append(copy.deepcopy(self.work_field))
@@ -188,9 +227,32 @@ class Sudoku:
             if self.solved:
                 return self.work_field
             self.work_field = copy.deepcopy(self.field_list[-1])
-        
+
         if min_value > 1:
             self.work_field = self.field_list.pop(-1)
+
+    def create_new_game(self, level):
+        """ (Sudoku, str) -> NoneType
+
+        Creates new Sudoku game with provided complexity level (easy, medium, hard, evil).
+        Another Sudoku game can be used as template for new one.
+
+        >>> sudoku = Sudoku()
+        >>> sudoku.create_new_game('easy')
+
+        >>> sudoku = Sudoku('test_game_ok.txt')
+        >>> sudoku.create_new('medium')
+        """
+        border = self.complexity_levels[level]
+        self.solve()
+
+        complexity = 0
+        random.seed()
+        while complexity <= border:
+            row = random.randint(0,8)
+            col = random.randint(0,8)
+            self.work_field[row][col] = 0
+            complexity = self.get_game_complexity()
 
     def print_field(self):
         """ (Sudoku) -> None
@@ -222,14 +284,12 @@ if __name__ == '__main__':
         sudoku.print_field()
 
     if args.new != None:
-        print 'Create new game with level of complexity ' + args.level
+        print 'Create new game with level of complexity: ' + args.level
         print 'Use other Game as template: ' + args.new
-        flag_no = args.new == 'no'
-        if flag_no:
-            args.new = os.path.dirname(os.path.realpath(__file__)) + '/game_empty.txt'
-        sudoku = Sudoku(args.new)
-        if not flag_no:
+        sudoku = Sudoku()
+        if args.new != 'no':
+            sudoku.read_game(args.new)
             sudoku.print_field()
-        sudoku.solve()
-        #sudoku.create_new(args.level)
+            print 'New Game'
+        sudoku.create_new_game(args.level)
         sudoku.print_field()
