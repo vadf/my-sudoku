@@ -71,7 +71,7 @@ class Sudoku:
         self.work_field = []
         f = open(filename, 'r')
         count = 0
-        pattern = re.compile('^[1-9*]{9}$')
+        pattern = re.compile('^[0-9*]{9}$')
         for line in f:
             if pattern.match(line):
                 count += 1
@@ -217,11 +217,13 @@ class Sudoku:
         # get the first cell and its possible values (hope that it is cell with the most minimum values)
         min_value = cur_pos_values.keys()[0]
         cell = cur_pos_values[min_value].keys()[0]
+        pos_values_list = list(cur_pos_values[min_value][cell])
 
         if min_value > 1:
             self.field_list.append(copy.deepcopy(self.work_field))
+            random.shuffle(pos_values_list)
 
-        for value in cur_pos_values[min_value][cell]:
+        for value in pos_values_list:
             self.work_field[cell[0]][cell[1]] = value
             self.solve()
             if self.solved:
@@ -272,7 +274,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     if args.solve == None and args.new == None:
-        print 'At least on of arguments -s(--solve) or -n(--new) should be specified'
+        print 'At least on of arguments -s(--solve) or -n(--new) should be specified' + '\n'
         parser.print_help()
         exit()
 
@@ -292,5 +294,6 @@ if __name__ == '__main__':
             sudoku.read_game(args.new)
             sudoku.print_field()
             print 'New Game:'
+        print 'Usually it works fast. If you are not lucky just do it (restart)'
         sudoku.create_new_game(args.level)
         sudoku.print_field()

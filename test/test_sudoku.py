@@ -157,13 +157,13 @@ class TestSudoku(unittest.TestCase):
                 if cell != 0:
                     self.assertEqual(cell, result[row][col])
 
-    @unittest.skip("uncomment and take a coffee break")
+    @unittest.skip("you can be lucky or can have a rest and watch movie")
     def test_solve_mad(self):
         """Test that sudoku with only few init values can be solved"""
         self.sudoku = sudoku.Sudoku(self.dir_path + '/' +'test_game_mad.txt')
         origin_field = copy.deepcopy(self.sudoku.work_field)
         complexity = self.sudoku.get_game_complexity()
-        self.assertEqual(complexity, 671)
+        self.assertEqual(complexity, 644)
         result = self.sudoku.solve()
         complexity = self.sudoku.get_game_complexity()
         self.assertEqual(complexity, 0)
